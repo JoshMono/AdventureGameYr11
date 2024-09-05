@@ -1,30 +1,24 @@
 import pygame
 
+from Scenes.ForestScene import ForestScene
+
 
 class MainMenu:
 	def _main_(player, screen):
 		class Button():
 			def __init__(self, position, scale):
-				self.width = 200 #image.get_width()
-				self.height = 50 #image.get_height()
+				self.width = scale[0] #image.get_width()
+				self.height = scale[1] #image.get_height()
 				self.surf = pygame.Surface(scale)
 				self.surf.fill((1, 255, 255)) # Colour
 				self.rect = self.surf.get_rect()
-				self.rect.topleft = position
+				self.rect.topleft = (position[0] - self.width / 2, position[1])
 				self.clicked = False
 
 			def draw(self):
-				action = False
-				pos = pygame.mouse.get_pos()
-
-				
-				
-
 				screen.blit(self.surf, (self.rect.x, self.rect.y))
-
-				return action
 	
-		button = Button((400,640), (200,50))
+		button = Button((400,400), (200,50))
 		clock = pygame.time.Clock()
 		
 		b = True
@@ -41,16 +35,14 @@ class MainMenu:
 
 				if event.type == pygame.QUIT:
 					b = False
-        
+					
+				if event.type == pygame.MOUSEBUTTONUP:
+					pos = pygame.mouse.get_pos()
+					if button.rect.collidepoint(pos):
+						ForestScene._main_(player, screen)
 			
-			pos = pygame.mouse.get_pos()
 			
 			print(button.rect)
-			print(pos)
-			if button.rect.collidepoint(pos):
-				print("Here")
-				
 			pygame.display.flip()
 			screen.fill((50, 157, 168))
-			screen.blit(button.surf, (button.rect.x, button.rect.y))
 			clock.tick(60)
