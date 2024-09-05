@@ -21,6 +21,7 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="all_classes.py" />
     <Compile Include="Scenes\ForestScene.py" />
     <Compile Include="main.py" />
     <Compile Include="Scenes\MainMenu.py" />
