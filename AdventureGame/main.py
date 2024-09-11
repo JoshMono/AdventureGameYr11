@@ -15,7 +15,7 @@ screen.fill((0, 0, 0))
 class Main:
     
 
-
-    player = all_classes.Player(screen_height, screen_width)
+    image = pygame.image.load('Assets/BigSword96x.png')
+    player = all_classes.Player(screen_height, screen_width, image)
     MainMenu._main_(player, screen)
 Main()

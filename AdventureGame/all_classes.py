@@ -1,46 +1,90 @@
 import pygame
+import random
+import asyncio
 
 class PlayerSprite(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, image):
         pygame.sprite.Sprite.__init__(self)
         #self.width = image.get_width()
         #self.height = image.get_height()
+        #self.image = image
         self.width = 40
         self.height = 40
         self.surf = pygame.Surface((self.width, self.height))
         self.image = self.surf
         self.rect = self.surf.get_rect()
+        swing_rect = pygame.sprite.Sprite()
+        swing_rect.width = self.width
+        swing_rect.height = self.height
+        swing_rect.surf = pygame.Surface((swing_rect.width, swing_rect.height))
+        swing_rect.rect = swing_rect.surf.get_rect()
+        swing_rect.surf.fill((0,0,0))
+        self.swing_cooldown = 0
         
-    def update(self, pressed_keys, collision_group, item_group):
+        self.swing_rect = swing_rect
+
+        
+    def update(self, pressed_keys, collision_group, item_group, screen, background, enemy_group):
         speed = 3
+
         if pressed_keys[pygame.K_LSHIFT]:
             speed = 5
         
-
+        
         if pressed_keys[pygame.K_a]:
+                        
+                
             self.rect.move_ip(-1*speed, 0)
             collide = pygame.sprite.spritecollide(self, collision_group, False)
             if collide != []:
                 self.rect.move_ip(speed, 0)
+                
+            if self.inventory['sword']:
+                self.swing_rect.rect.topleft = (self.rect.left - self.swing_rect.width, self.rect.top)
+                a = pygame.sprite.spritecollide(self.swing_rect, item_group, False)
+                
+                print(self.rect.topleft)
+                print(self.swing_rect.rect.topleft)
+                
+                print(" ")
+
+                if a != []:
+                    for i in a:
+                        print(i)
+           
+                
 
         if pressed_keys[pygame.K_w]:
             self.rect.move_ip(0, -1*speed)
             collide = pygame.sprite.spritecollide(self, collision_group, False)
             if collide != []:
                 self.rect.move_ip(0, speed)
+                
+           
 
         if pressed_keys[pygame.K_s]:
             self.rect.move_ip(0, speed)
             collide = pygame.sprite.spritecollide(self, collision_group, False)
             if collide != []:
                 self.rect.move_ip(0, -1*speed)
+           
 
         if pressed_keys[pygame.K_d]:
             self.rect.move_ip(speed, 0)
             collide = pygame.sprite.spritecollide(self, collision_group, False)
+            
             if collide != []:
                 self.rect.move_ip(-1*speed, 0)
-            
+                
+        if self.swing_cooldown == 0:
+
+            if pressed_keys[pygame.K_SPACE]:
+                if self.inventory['sword']:
+                    self.swing_sword(enemy_group)
+                    
+        else:
+            self.swing_cooldown -= 1
+
         if pygame.sprite.spritecollide(self, item_group, False):
             item = pygame.sprite.spritecollide(self, item_group, False)
             if pressed_keys[pygame.K_e]:
@@ -49,6 +93,16 @@ class PlayerSprite(pygame.sprite.Sprite):
             return ("item", item[0])
 
         return None
+    
+    def swing_sword(self, enemy_group):
+        self.swing_cooldown = 40
+        a = pygame.sprite.spritecollide(self.swing_rect, enemy_group, False)
+        print(self.swing_rect.rect.topleft)
+        
+        
+        if a != []:
+            for i in a:
+                i.surf.fill((random.randrange(1,240),random.randrange(1,240),random.randrange(1,240)))
 
 
             
@@ -56,8 +110,8 @@ class PlayerSprite(pygame.sprite.Sprite):
 
 
 class Player(PlayerSprite):
-    def __init__(self, screen_height, screen_width):
-        super().__init__()
+    def __init__(self, screen_height, screen_width, image):
+        super().__init__(image)
         self.screen_height = screen_height
         self.screen_width = screen_width
         self.health = 100
@@ -65,6 +119,17 @@ class Player(PlayerSprite):
                 'sword': False,
                 'wood': 0
             }
+     
+class Enemy(pygame.sprite.Sprite):
+     def __init__(self, pos):
+        pygame.sprite.Sprite.__init__(self)
+        self.width = 40
+        self.height = 40
+        self.surf = pygame.Surface((self.width, self.height))
+        self.image = self.surf
+        self.rect = self.surf.get_rect()
+        self.surf.fill((25,120,244))
+        self.rect.topleft = pos
 
 
 class Camera(pygame.sprite.Group):
@@ -118,6 +183,10 @@ class Item(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         if self.item == 'sword':
             self.image = pygame.image.load("Assets/BigSword96x.png")
+            
+        elif self.item == 'wood':
+            self.image = pygame.image.load("Assets/Wood96x.png")
+            
         else:
             self.image = self.surf
                         
@@ -129,6 +198,11 @@ class Item(pygame.sprite.Sprite):
         self.kill()
         if self.item == 'sword':
             player.inventory['sword'] = True
+            player.surf.fill((255,255,255))
+            
+        if self.item == 'wood':
+            player.inventory['wood'] += 1
+            player.surf.fill((100,100,255))
         
 
 
